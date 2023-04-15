@@ -1,0 +1,6 @@
+aiogram
+pandas
+python-dotenv
+sqlalchemy
+alembic
+openpyxl
