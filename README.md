@@ -19,6 +19,10 @@ source venv/bin/activate  # для Linux
   ```
   - В корне директории создать файл .env и заполнить в соответствии с файлом .env.example
 
+  - Сделать миграции
+  ```
+  alembic upgrade head
+  ```
   - Запустить проект
   ```
 python app.py
