@@ -1,7 +1,9 @@
 import os
 
+import requests
 import pandas as pd
 from aiogram import Dispatcher, types
+from lxml import html
 
 from database import models
 from database.database import SessionLocal
@@ -28,15 +30,24 @@ async def handle_file(message: types.Message):
         file.write(downloaded_file.getvalue())
     data = pd.read_excel(file_name, names=None)
     for _, row in data.iterrows():
+
+        response = requests.get(row["url"])
+        parsed_page = html.fromstring(response.content)
+        xpath_price = row["xpath"]
+        price = parsed_page.xpath(xpath_price)[0].text_content()
+
         await message.answer(f'Title - {row["title"]}\n'
                              f'Url - {row["url"]}\n'
-                             f'Xpath - {row["xpath"]}')
+                             f'Xpath - {row["xpath"]}\n'
+                             f'Price - {price}')
+
         db = SessionLocal()
         zuzublik = models.Zuzublik(
             title=row['title'],
             url=row['url'],
             xpath=row['xpath'],
         )
+
         db.add(zuzublik)
         db.commit()
         db.refresh(zuzublik)
