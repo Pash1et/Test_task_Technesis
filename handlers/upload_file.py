@@ -25,27 +25,33 @@ async def handle_file(message: types.Message):
     await message.answer(f'Файл {file_name} загружен')
 
     file_name = os.path.join('data', file_name)
+
     with open(f'{file_name}', 'wb') as file:
         downloaded_file = await bot.download_file(file_path)
         file.write(downloaded_file.getvalue())
+
     data = pd.read_excel(file_name, names=None)
+
     for _, row in data.iterrows():
 
-        response = requests.get(row["url"])
-        parsed_page = html.fromstring(response.content)
-        xpath_price = row["xpath"]
-        price = parsed_page.xpath(xpath_price)[0].text_content()
+        title = row['title']
+        url = row['url']
+        xpath = row['xpath']
 
-        await message.answer(f'Title - {row["title"]}\n'
-                             f'Url - {row["url"]}\n'
-                             f'Xpath - {row["xpath"]}\n'
+        response = requests.get(url)
+        parsed_page = html.fromstring(response.content)
+        price = parsed_page.xpath(xpath)[0].text_content()
+
+        await message.answer(f'Title - {title}\n'
+                             f'Url - {url}\n'
+                             f'Xpath - {xpath}\n'
                              f'Price - {price}')
 
         db = SessionLocal()
         zuzublik = models.Zuzublik(
-            title=row['title'],
-            url=row['url'],
-            xpath=row['xpath'],
+            title=title,
+            url=url,
+            xpath=xpath,
         )
 
         db.add(zuzublik)
